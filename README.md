@@ -6,12 +6,13 @@
 - Burn it to SD Card
 - Power on and connect with `pi` `raspberry`
 - `sudo raspi-config`: enable ssh server and wlan
-- `ssh-copy-id pi@raspberrypi.local && ssh pi@raspberrypi.local`
-- ```
+- `ssh-copy-id pi@raspberrypi.local && ssh pi@raspberrypi.local` 
+```
 sudo apt update
 sudo apt upgrade
 sudo apt install vim
 ```
+
 - edit `/boot/config.txt`
 ```
 # Disable the rainbow splash screen
@@ -26,7 +27,6 @@ dtoverlay=sdtweak,overclock_50=100
  
 # Set the bootloader delay to 0 seconds. The default is 1s if not specified.
 boot_delay=0
-
 ```
 - edit `/boot/cmdline.txt`: add quiet params
 ```
