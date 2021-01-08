@@ -7,11 +7,11 @@ import { existsSync } from 'fs';
 
 program
   .command("oauth")
-  .requiredOption("-c, --config")
-  .action(async (configFile) => {
+  .requiredOption("-c, --config <configFile>")
+  .action(async (cmd) => {
     console.log("oauth cmd")
     try {
-      const config = await loadConfig(configFile)
+      const config = await loadConfig(cmd.config)
       const scope = "https://www.googleapis.com/auth/photoslibrary.readonly https://www.googleapis.com/auth/photoslibrary https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata"
       const tokens = await getUserToken(config.clientId, config.clientSecret, scope)
       console.log("user tokens:", tokens)
@@ -23,10 +23,10 @@ program
 
 program
   .command("list")
-  .requiredOption("-c, --config")
-  .action(async (configFile) => {
+  .requiredOption("-c, --config <configFile>")
+  .action(async (cmd) => {
     try {
-      const config = await loadConfig(configFile)
+      const config = await loadConfig(cmd.config)
       const tokens = await getTokens(config)
       const response = await albumList(tokens.access_token!)
       console.log(response.albums.map((a: any) => ({id: a.id, title: a.title})))
@@ -37,22 +37,22 @@ program
 
 program
   .command("downloadAlbum")
-  .requiredOption("-c, --config")
-  .action(async (configFile) => {
+  .requiredOption("-c, --config <configFile>")
+  .action(async (cmd) => {
     try {
-      const config = await loadConfig(configFile)
+      const config = await loadConfig(cmd.config)
       let items: any[] = []
       const tokens = await getTokens(config)
       const pageSize = 50
-      let response = await mediaItemsSearch(tokens.access_token!, configFile.albumId, pageSize);
+      let response = await mediaItemsSearch(tokens.access_token!, config.albumId, pageSize);
       items = items.concat(response.mediaItems)
       
       while(response.nextPageToken) {
-        response = await mediaItemsSearch(tokens.access_token!, configFile.albumId, pageSize, response.nextPageToken);
+        response = await mediaItemsSearch(tokens.access_token!, config.albumId, pageSize, response.nextPageToken);
         items = items.concat(response.mediaItems)
       }
       console.log(`got ${items.length} media items`)
-      await writeFile("tmp/album.json", JSON.stringify(items))
+      await writeFile(`${config.workingFolder}/album.json`, JSON.stringify(items))
     } catch (error) {
       console.error("error during downloadAlbum album:", error)
     }
@@ -60,18 +60,19 @@ program
 
 program
   .command("randomPhoto")
-  .requiredOption("-c, --config")
-  .action(async (configFile) => {
+  .requiredOption("-c, --config <configFile>")
+  .action(async (cmd) => {
     try {
-      const config = await loadConfig(configFile)
-      const content = await readFile("tmp/album.json")
+      const config = await loadConfig(cmd.config)
+      const content = await readFile(`${config.workingFolder}/album.json`)
+      const tokens = await getTokens(config)
       const items = JSON.parse(content.toString())
       let tries = 3
       let item = randomElement(items)
       
       while(tries > 0) {
         const filename = getMediaItemFilename(item)
-        const fileAlreadyExists = existsSync(`tmp/album/${filename}`)
+        const fileAlreadyExists = existsSync(`${config.workingFolder}/album/${filename}`)
         if (fileAlreadyExists) {
           item = randomElement(items)
           tries--
@@ -81,7 +82,7 @@ program
       }
       console.debug("item", item)
       const filename = getMediaItemFilename(item)
-      await downloadImage(item, `tmp/album/${filename}`)
+      await downloadImage(tokens.access_token!, item, `${config.workingFolder}/album/${filename}`)
       console.log("done")
     } catch (error) {
       console.error("error during random photo:", error)

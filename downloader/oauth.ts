@@ -47,7 +47,9 @@ export async function refreshToken(clientId: string, clientSecret: string, token
     redirect_uris: ['urn:ietf:wg:oauth:2.0:oob']
   })
 
-  return client.refresh(tokenSet)
+  const refreshed = await client.refresh(tokenSet)
+  refreshed.refresh_token = tokenSet.refresh_token
+  return refreshed
 }
 
 export function readTokens(str: string): TokenSet {
