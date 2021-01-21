@@ -2,3 +2,5 @@ dist/
 tmp/
 logs/
 node_modules/
+env/
+bundle/

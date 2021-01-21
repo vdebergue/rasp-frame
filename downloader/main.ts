@@ -1,9 +1,9 @@
 import { program } from 'commander';
 import { getUserToken, readTokens, refreshToken } from './oauth'
-import { writeFile, readFile } from 'fs/promises';
+import { writeFile, readFile, mkdir, symlink, rm, stat } from 'fs/promises';
 import { TokenSet } from 'openid-client';
 import { albumList, mediaItemsSearch, downloadImage } from './google-photos';
-import { existsSync } from 'fs';
+import { existsSync, fstat } from 'fs';
 
 program
   .command("oauth")
@@ -46,7 +46,7 @@ program
       const pageSize = 50
       let response = await mediaItemsSearch(tokens.access_token!, config.albumId, pageSize);
       items = items.concat(response.mediaItems)
-      
+
       while(response.nextPageToken) {
         response = await mediaItemsSearch(tokens.access_token!, config.albumId, pageSize, response.nextPageToken);
         items = items.concat(response.mediaItems)
@@ -69,7 +69,7 @@ program
       const items = JSON.parse(content.toString())
       let tries = 3
       let item = randomElement(items)
-      
+
       while(tries > 0) {
         const filename = getMediaItemFilename(item)
         const fileAlreadyExists = existsSync(`${config.workingFolder}/album/${filename}`)
@@ -82,7 +82,13 @@ program
       }
       console.debug("item", item)
       const filename = getMediaItemFilename(item)
+      try {
+        await mkdir(`${config.workingFolder}/album`, {recursive: true})
+      } catch (error) {
+      }
       await downloadImage(tokens.access_token!, item, `${config.workingFolder}/album/${filename}`)
+      await rm(`${config.workingFolder}/latest`, {force: true})
+      await symlink(`${config.workingFolder}/album/${filename}`, `${config.workingFolder}/latest`)
       console.log("done")
     } catch (error) {
       console.error("error during random photo:", error)

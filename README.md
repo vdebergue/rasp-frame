@@ -2,15 +2,15 @@
 
 ## Setup
 
-- Download OS lite https://www.raspberrypi.org/software/operating-systems/ 
+- Download OS lite https://www.raspberrypi.org/software/operating-systems/
 - Burn it to SD Card
 - Power on and connect with `pi` `raspberry`
 - `sudo raspi-config`: enable ssh server and wlan
-- `ssh-copy-id pi@raspberrypi.local && ssh pi@raspberrypi.local` 
+- `ssh-copy-id pi@raspberrypi.local && ssh pi@raspberrypi.local`
 ```
 sudo apt update
 sudo apt upgrade
-sudo apt install vim git
+sudo apt install vim git python3-venv libopenjp2-7 libtiff5
 ```
 
 - edit `/boot/config.txt`
@@ -20,11 +20,11 @@ disable_splash=1
 
 # Disable bluetooth
 dtoverlay=pi3-disable-bt
- 
+
 # Overclock the SD Card from 50 to 100MHz
 # This can only be done with at least a UHS Class 1 card
 dtoverlay=sdtweak,overclock_50=100
- 
+
 # Set the bootloader delay to 0 seconds. The default is 1s if not specified.
 boot_delay=0
 ```
@@ -45,25 +45,43 @@ systemctl disable remote-fs.target
 systemctl disable apt-daily-upgrade.timer
 systemctl disable nfs-config.service
 ```
+
+- Install recent nodejs
+
+```
+export NODE_VER=14.15.4
+if ! node --version | grep -q ${NODE_VER}; then
+  (cat /proc/cpuinfo | grep -q "Pi Zero") && if [ ! -d node-v${NODE_VER}-linux-armv6l ]; then
+    echo "Installing nodejs ${NODE_VER} for armv6 from unofficial builds..."
+    curl -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VER}/node-v${NODE_VER}-linux-armv6l.tar.xz
+    tar -xf node-v${NODE_VER}-linux-armv6l.tar.xz
+  fi
+  echo "Adding node to the PATH"
+  PATH=$(pwd)/node-v${NODE_VER}-linux-armv6l/bin:${PATH}
+fi
+```
+
 - reboot
+
 
 # Epaper setup
 
 - enable SPI with `raspi-config`
+
+# Test epaper (optional)
+
 - Install BCM drivers
 
 ```
 cd /opt
 wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.60.tar.gz
-tar zxvf bcm2835-1.60.tar.gz 
+tar zxvf bcm2835-1.60.tar.gz
 cd bcm2835-1.60/
 ./configure
 make
 sudo make check
 sudo make install
 ```
-
-# Test epaper
 
 ```
 cd
@@ -75,4 +93,16 @@ make
 Run
 ```
 sudo ./epd -1.55
+```
+
+## Imager
+
+```
+python3 -m venv env
+source env/bin/activate
+cd IT8951
+pip install -r requirements.txt
+sudo apt install python3-dev
+python3 setup.py install
+cd ../imager
 ```
