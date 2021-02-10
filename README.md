@@ -106,3 +106,9 @@ sudo apt install python3-dev
 python3 setup.py install
 cd ../imager
 ```
+
+## Pijuice
+
+```
+sudo apt-get install pijuice-base
+```

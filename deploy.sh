@@ -31,3 +31,4 @@ rsync -azP -e "ssh -p $ssh_port" $root_dir/downloader/dist "$ssh_user"@"$ssh_hos
 rsync -azP -e "ssh -p $ssh_port" $root_dir/imager "$ssh_user"@"$ssh_host":/opt/rasp-frame
 rsync -azP -e "ssh -p $ssh_port" $root_dir/IT8951 "$ssh_user"@"$ssh_host":/opt/rasp-frame
 rsync -azP -e "ssh -p $ssh_port" $root_dir/run.sh "$ssh_user"@"$ssh_host":/opt/rasp-frame
+rsync -azP -e "ssh -p $ssh_port" $root_dir/rasp-frame.unit "$ssh_user"@"$ssh_host":/opt/rasp-frame

@@ -8,6 +8,7 @@ export async function getUserToken(clientId: string, clientSecret: string, scope
     client_id: clientId,
     client_secret: clientSecret,
     response_types: ['code'],
+    access_type: 'offline',
     redirect_uris: ['urn:ietf:wg:oauth:2.0:oob']
   })
 
@@ -47,7 +48,7 @@ export async function refreshToken(clientId: string, clientSecret: string, token
     redirect_uris: ['urn:ietf:wg:oauth:2.0:oob']
   })
 
-  const refreshed = await client.refresh(tokenSet)
+  const refreshed = await client.refresh(tokenSet.refresh_token!!)
   refreshed.refresh_token = tokenSet.refresh_token
   return refreshed
 }

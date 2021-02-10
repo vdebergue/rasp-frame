@@ -1,0 +1,13 @@
+[Unit]
+Description=Rasp Frame
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/rasp-frame/run.sh
+ExecStart=sudo shutdown
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target
