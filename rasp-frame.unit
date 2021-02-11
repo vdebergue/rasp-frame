@@ -5,7 +5,8 @@ After=network.target
 [Service]
 Type=oneshot
 ExecStart=/opt/rasp-frame/run.sh
-ExecStart=sudo shutdown
+ExecStart=/opt/rasp-frame/pijuice/enable-wakeup.py
+ExecStart=sudo shutdown --poweroff 1
 User=pi
 Group=pi
 

@@ -28,6 +28,7 @@ if [[ "$FAST" == "0" ]]; then
   sudo mkdir -p /opt/rasp-frame/downloader
   sudo mkdir -p /opt/rasp-frame/imager
   sudo mkdir -p /opt/rasp-frame/IT8951
+  sudo mkdir -p /opt/rasp-frame/pijuice
   sudo chown -R $ssh_user:$ssh_user /opt/rasp-frame
 EOF
 fi
@@ -37,3 +38,9 @@ rsync -azP -e "ssh -p $ssh_port" $root_dir/imager "$ssh_user"@"$ssh_host":/opt/r
 rsync -azP -e "ssh -p $ssh_port" $root_dir/IT8951 "$ssh_user"@"$ssh_host":/opt/rasp-frame
 rsync -azP -e "ssh -p $ssh_port" $root_dir/run.sh "$ssh_user"@"$ssh_host":/opt/rasp-frame
 rsync -azP -e "ssh -p $ssh_port" $root_dir/rasp-frame.unit "$ssh_user"@"$ssh_host":/opt/rasp-frame
+rsync -azP -e "ssh -p $ssh_port" $root_dir/pijuice "$ssh_user"@"$ssh_host":/opt/rasp-frame
+
+rpi_exec << EOF
+  sudo cp /opt/rasp-frame/rasp-frame.unit /etc/systemd/system/rasp-frame.service
+  sudo systemctl daemon-reload
+EOF
