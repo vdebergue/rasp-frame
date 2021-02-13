@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
 import { pipeline } from 'stream';
-import { createWriteStream } from 'fs';
+import { constants, createWriteStream, exists } from 'fs';
+import { access, stat } from 'fs/promises';
 
 const baseUrl = "https://photoslibrary.googleapis.com/v1"
 
@@ -49,6 +50,11 @@ export async function getMediaItem(accessToken: string, id: string): Promise<any
 
 // https://developers.google.com/photos/library/guides/access-media-items#base-urls
 export async function downloadImage(accessToken: string, mediaItem: any, location: string): Promise<void> {
+  const fileAlreadyExists = await fileExists(location)
+  if (fileAlreadyExists) {
+    console.log(`File ${location} already exists`)
+    return Promise.resolve()
+  }
   const refreshedItem = await getMediaItem(accessToken, mediaItem.id)
   const response = await fetch(`${refreshedItem.baseUrl}=d`)
   if (!response.ok) {
@@ -65,4 +71,10 @@ export async function downloadImage(accessToken: string, mediaItem: any, locatio
     p.on("finish", () => resolve())
   })
   
+}
+
+async function fileExists(location:string): Promise<boolean> {
+  return access(location, constants.F_OK)
+    .then(() => true)
+    .catch(() => false)
 }
