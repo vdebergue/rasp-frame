@@ -41,22 +41,26 @@ program
   .action(async (cmd) => {
     try {
       const config = await loadConfig(cmd.config)
-      let items: any[] = []
       const tokens = await getTokens(config)
-      const pageSize = 50
-      let response = await mediaItemsSearch(tokens.access_token!, config.albumId, pageSize);
-      items = items.concat(response.mediaItems)
-
-      while(response.nextPageToken) {
-        response = await mediaItemsSearch(tokens.access_token!, config.albumId, pageSize, response.nextPageToken);
-        items = items.concat(response.mediaItems)
-      }
-      console.log(`got ${items.length} media items`)
-      await writeFile(`${config.workingFolder}/album.json`, JSON.stringify(items))
+      await downloadAlbum(tokens, config)
     } catch (error) {
       console.error("error during downloadAlbum album:", error)
     }
   })
+
+async function downloadAlbum(tokens: TokenSet, config: Config) {
+  let items: any[] = []
+  const pageSize = 50
+  let response = await mediaItemsSearch(tokens.access_token!, config.albumId, pageSize);
+  items = items.concat(response.mediaItems)
+
+  while(response.nextPageToken) {
+    response = await mediaItemsSearch(tokens.access_token!, config.albumId, pageSize, response.nextPageToken);
+    items = items.concat(response.mediaItems)
+  }
+  console.log(`got ${items.length} media items`)
+  await writeFile(`${config.workingFolder}/album.json`, JSON.stringify(items))
+}
 
 program
   .command("randomPhoto")
@@ -64,8 +68,13 @@ program
   .action(async (cmd) => {
     try {
       const config = await loadConfig(cmd.config)
-      const content = await readFile(`${config.workingFolder}/album.json`)
       const tokens = await getTokens(config)
+      const now = new Date()
+      if (now.getDate() == 1) {
+        console.log("refreshing album")
+        await downloadAlbum(tokens, config)
+      }
+      const content = await readFile(`${config.workingFolder}/album.json`)
       const items = JSON.parse(content.toString())
       let tries = 3
       let item = randomElement(items)
@@ -87,6 +96,7 @@ program
       } catch (error) {
       }
       await downloadImage(tokens.access_token!, item, `${config.workingFolder}/album/${filename}`)
+      // TODO fallback to local image if error during download or refresh
       await rm(`${config.workingFolder}/latest`, {force: true})
       await symlink(`${config.workingFolder}/album/${filename}`, `${config.workingFolder}/latest`)
       console.log("done")
@@ -101,6 +111,7 @@ async function getTokens(config: Config): Promise<TokenSet> {
   const tokenStr = await readFile(`${config.workingFolder}/tokens.json`)
   let tokens = readTokens(tokenStr.toString())
   console.debug(tokens)
+  console.debug(`expires_at: ${tokens.expires_at} - date = ${new Date().getTime() / 1000}` )
   if (tokens.expired()) {
     console.log("refreshing tokens")
     tokens = await refreshToken(config.clientId, config.clientSecret, tokens)

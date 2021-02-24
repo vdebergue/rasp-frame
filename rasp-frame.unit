@@ -9,6 +9,8 @@ ExecStart=/opt/rasp-frame/pijuice/enable-wakeup.py
 ExecStart=sudo shutdown --poweroff 1
 User=pi
 Group=pi
+StandardOutput=append:/var/log/rasp-frame.out.log
+StandardError=append:/var/log/rasp-frame.err.log
 
 [Install]
 WantedBy=multi-user.target
