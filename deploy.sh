@@ -6,7 +6,7 @@ set -o pipefail
 export ssh_user=${PI_USER:-pi}
 export ssh_host=${PI_HOST:-raspberrypi.local}
 export ssh_port=${PI_PORT:-22}
-FAST=${FAST:0}
+export FAST=${FAST:-no}
 
 function rpi_exec() {
   ssh "$ssh_user"@"$ssh_host" -p "$ssh_port" $@
@@ -14,7 +14,7 @@ function rpi_exec() {
 
 root_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # Compile TS
-if [[ "$FAST" == "0" ]]; then
+if [[ "$FAST" == "no" ]]; then
   cd $root_dir/downloader
   npm install
   npm run dist

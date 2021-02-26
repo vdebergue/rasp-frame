@@ -12,7 +12,7 @@ program
     console.log("oauth cmd")
     try {
       const config = await loadConfig(cmd.config)
-      const scope = "https://www.googleapis.com/auth/photoslibrary.readonly https://www.googleapis.com/auth/photoslibrary https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata"
+      const scope = "https://www.googleapis.com/auth/photoslibrary.readonly"
       const tokens = await getUserToken(config.clientId, config.clientSecret, scope)
       console.log("user tokens:", tokens)
       saveTokens(tokens, config.workingFolder)
