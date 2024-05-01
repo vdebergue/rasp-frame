@@ -22,7 +22,7 @@ fi
 
 cd $root_dir
 
-if [[ "$FAST" == "0" ]]; then
+if [[ "$FAST" == "no" ]]; then
   rpi_exec << EOF
   sudo mkdir -p /opt/rasp-frame/tmp
   sudo mkdir -p /opt/rasp-frame/downloader
@@ -38,9 +38,11 @@ rsync -azP -e "ssh -p $ssh_port" $root_dir/imager "$ssh_user"@"$ssh_host":/opt/r
 rsync -azP -e "ssh -p $ssh_port" $root_dir/IT8951 "$ssh_user"@"$ssh_host":/opt/rasp-frame
 rsync -azP -e "ssh -p $ssh_port" $root_dir/run.sh "$ssh_user"@"$ssh_host":/opt/rasp-frame
 rsync -azP -e "ssh -p $ssh_port" $root_dir/rasp-frame.unit "$ssh_user"@"$ssh_host":/opt/rasp-frame
+rsync -azP -e "ssh -p $ssh_port" $root_dir/pijuice-shutdown.unit "$ssh_user"@"$ssh_host":/opt/rasp-frame
 rsync -azP -e "ssh -p $ssh_port" $root_dir/pijuice "$ssh_user"@"$ssh_host":/opt/rasp-frame
 
 rpi_exec << EOF
   sudo cp /opt/rasp-frame/rasp-frame.unit /etc/systemd/system/rasp-frame.service
+  sudo cp /opt/rasp-frame/pijuice-shutdown.unit /etc/systemd/system/pijuice-shutdown.service
   sudo systemctl daemon-reload
 EOF

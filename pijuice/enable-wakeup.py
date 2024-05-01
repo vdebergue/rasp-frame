@@ -11,6 +11,17 @@ pj = pijuice.PiJuice(1, 0x14)
 print(f"Current time: {datetime.date.today()}")
 print(f"status {pj.status.GetStatus()}")
 print(f"charge level: {pj.status.GetChargeLevel()}")
+now = datetime.datetime.now()
+dt = {
+    'second': now.second,
+    'minute': now.minute,
+    'hour': now.hour,
+    'weekday': now.weekday(),
+    'day': now.day,
+    'month': now.month,
+    'year': now.year,
+}
+pj.rtcAlarm.SetTime(dt)
 pj.rtcAlarm.SetAlarm(
     {
         'second': 0,

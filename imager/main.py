@@ -30,6 +30,7 @@ def main():
   display.frame_buf.paste(image, paste_coords)
   display.draw_full(constants.DisplayModes.GC16)
   print("done")
+  display.epd.sleep()
 
 def get_paste_coords(image):
   # return [dims[i] - image.size[i] for i in (0,1)]  # align image with bottom of display

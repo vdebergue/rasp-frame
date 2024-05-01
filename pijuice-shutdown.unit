@@ -1,0 +1,11 @@
+[Unit]
+Description=Poweroff pijuice
+DefaultDependencies=no
+After=final.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/rasp-frame/pijuice/poweroff.py
+
+[Install]
+WantedBy=final.target
